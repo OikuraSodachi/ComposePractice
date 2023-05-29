@@ -29,6 +29,11 @@ class FileListViewModel @Inject constructor():ViewModel(){
     val sortedFileList : StateFlow<List<FileItem>>
         get() = _sortedFileList
 
+    private val _nsortedFileList = MutableStateFlow<List<File>>(emptyList())
+    val nsortedFileList : StateFlow<List<File>>
+        get() = _nsortedFileList
+
+
     private val _selectMode = MutableStateFlow<Int>(Constants.DEFAULT_MODE)      // selectMode 원본
     val selectMode : StateFlow<Int>
         get() = _selectMode
@@ -56,21 +61,17 @@ class FileListViewModel @Inject constructor():ViewModel(){
     private val fAction = FileAction()
     fun updateContents() {
         viewModelScope.launch {
-            val pFileList = (_currentPath.value.toFile().listFiles() as Array<File>).sortedBy { it.name }
-
-
-            suspend fun fileList(): List<FileItem> {
-                val result = mutableListOf<FileItem>()
-                for (index in 0..pFileList.size - 1) {
-                    val file = pFileList[index]
-                    result.add(file.toFileItem(file))
-                }
-                return result
-            }
-            _sortedFileList.value = fileList()
+            val fileList = (_currentPath.value.toFile().listFiles() as Array<File>).sortedBy { it.name }
+            _nsortedFileList.value = fileList
             _dirTree.value = dirTree(_currentPath.value)
+
+
         }
     }
+
+
+
+
 
     fun onDirectoryClick(dirName:Path){
         _currentPath.value = dirName
